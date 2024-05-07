@@ -25,11 +25,12 @@ STACK_NAME ?= ghostscript-layer
 result/bin/gs: all
 
 build/output.yaml: template.yaml
-	aws cloudformation ${PROFILE} package --template $< --s3-bucket $(DEPLOYMENT_BUCKET) --output-template-file $@
+	rm -f build/output.yaml
+	aws cloudformation package --template $< --s3-bucket $(DEPLOYMENT_BUCKET) --output-template-file $@
 
 deploy: build/output.yaml
-	aws cloudformation ${PROFILE} deploy --template $< --stack-name $(STACK_NAME)
-	aws cloudformation ${PROFILE} describe-stacks --stack-name $(STACK_NAME) --query Stacks[].Outputs --output table
+	aws cloudformation deploy --template $< --stack-name $(STACK_NAME)
+	aws cloudformation describe-stacks --stack-name $(STACK_NAME) --query Stacks[].Outputs --output table
 
 publish:
 	sam publish -t build/output.yaml ${PROFILE}
