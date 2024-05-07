@@ -51,27 +51,47 @@ base, provide a `DOCKER_IMAGE` variable when invoking `make`.
 Modify the versions of libraries or Ghostscript directly in [`Makefile_gs`](Makefile_gs).
 
 
-### Compiled info
-
-```
-ghostscript version 9.27
-```
-
-
 ## Deploying to AWS as a layer
 
 Run the following command to deploy the compiled result as a layer in your AWS account.
 
+### Staging
 ```
-make deploy DEPLOYMENT_BUCKET=<YOUR BUCKET NAME> [PROFILE="--profile <YOUR NAMED PROFILE FROM ~/.aws/credentials>"]
+aws-vault exec main-staging make deploy DEPLOYMENT_BUCKET=light.staging.main.lambda-layers
 ```
 
+### Production
+```
+aws-vault exec main-production make deploy DEPLOYMENT_BUCKET=light.production.main.lambda-layers
+```
+
+NOTE: **Don't forget to update the version table below with the new version number.**
 
 ### Configuring the deployment
 
 By default, this uses `ghostscript-layer` as the stack name. Provide a
 `STACK_NAME` variable when calling `make deploy` to use an alternative name.
 
+## Throbleshooting
+
+If the deployment fails and you get an error like this:
+
+```
+An error occurred (ValidationError) when calling the CreateChangeSet operation: Stack:arn:aws:cloudformation:eu-west-1:934322491391:stack/ghostscript-layer/57003290-0c5c-11ef-bb30-0ae4f6954fa5 is in ROLLBACK_COMPLETE state and can not be updated.
+```
+
+You need to first delete the stack before you can deploy again. To do that, run the following command:
+
+```
+aws-vault exec main-staging aws cloudformation delete-stack --stack-name ghostscript-layer
+```
+
+## Versions 
+
+| Layer Version | Ghostscript Version |
+|---------------|---------------------|
+| 1             | 9.27                |
+| 2             | 10.02.1             |
 
 ## Additional Info
 
